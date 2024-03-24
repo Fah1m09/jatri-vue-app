@@ -6,6 +6,8 @@ const pageSize = 10;
 const sortOrder = ref("asc");
 const pageNumber = ref(1);
 const searchText = ref("");
+const numberOfPage = ref(0);
+const totalPosts = ref(0);
 
 async function fetchPost() {
   posts.value = await fetch(`https://jsonplaceholder.typicode.com/posts`).then(
@@ -17,22 +19,25 @@ fetchPost();
 
 // Pagination logic
 const postResults = computed(() => {
+  let filtered = posts?.value;
+
   const startIndex = (pageNumber.value - 1) * pageSize;
   const endIndex = startIndex + pageSize;
 
-  return posts?.value
-    ?.filter((post) =>
-      post.title.toLowerCase().includes(searchText.value.toLowerCase())
-    )
-    .slice(startIndex, endIndex);
-});
+  filtered = filtered?.filter((post) =>
+    post.title.toLowerCase().includes(searchText.value.toLowerCase())
+  );
 
-const numberOfPage = computed(() => {
-  return Math.ceil(postResults?.value.length / pageSize);
-});
+  if (sortOrder.value === "asc") {
+    filtered?.sort((a, b) => a.title.localeCompare(b.title));
+  } else {
+    filtered?.sort((a, b) => b.title.localeCompare(a.title));
+  }
 
-const totalPosts = computed(() => {
-  return postResults?.value?.length;
+  totalPosts.value = filtered?.length;
+  numberOfPage.value = Math.ceil(filtered?.length / pageSize);
+
+  return filtered?.slice(startIndex, endIndex);
 });
 
 const nextPage = () => {
@@ -48,15 +53,8 @@ const prevPage = () => {
   }
 };
 
-const sortPosts = () => {
-  // Sort posts based on sortOrder
-  postResults.value.sort((a, b) => {
-    if (sortOrder.value === "asc") {
-      return a.title.localeCompare(b.title);
-    } else {
-      return b.title.localeCompare(a.title);
-    }
-  });
+const toggleSortOrder = () => {
+  sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
 };
 </script>
 
@@ -90,9 +88,6 @@ const sortPosts = () => {
         placeholder="Search for items"
       />
     </div>
-    <button class="paginationButton rounded-full" @click="searchPost">
-      search
-    </button>
   </div>
 
   <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -108,7 +103,7 @@ const sortPosts = () => {
           <th
             scope="col"
             class="tableData hover:bg-blue-200 cursor-pointer"
-            @click="sortPosts"
+            @click="toggleSortOrder"
           >
             Title
           </th>
@@ -128,7 +123,7 @@ const sortPosts = () => {
             {{ post.id }}
           </td>
           <td class="tableData">{{ post.userId }}</td>
-          <td class="tableData" @click="">{{ post.title }}</td>
+          <td class="tableData">{{ post.title }}</td>
           <td class="tableData">{{ post.body }}</td>
         </tr>
       </tbody>
@@ -140,11 +135,14 @@ const sortPosts = () => {
       <span
         class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto"
         >Showing
-        <span class="font-semibold text-gray-900 dark:text-white">1-10</span> of
         <span class="font-semibold text-gray-900 dark:text-white">
           {{ totalPosts }}
         </span>
       </span>
+      <div>
+        <span class="text-sm text-gray-500 dark:text-white">No of Pages:</span>
+        {{ numberOfPage }}
+      </div>
       <ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
         <li>
           <button @click="prevPage" class="rounded-s-lg paginationButton">
@@ -155,9 +153,6 @@ const sortPosts = () => {
         <li>
           <span class="paginationButton">
             {{ pageNumber }}
-          </span>
-          <span class="bg-red-400">
-            {{ numberOfPage }}
           </span>
         </li>
 
