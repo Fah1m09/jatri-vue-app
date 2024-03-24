@@ -59,7 +59,9 @@ const toggleSortOrder = () => {
 </script>
 
 <template>
-  <div class="my-6 flex">
+  <div class="my-6 flex justify-between">
+    <h3 class="text-3xl font-semibold text-gray-900">Post List</h3>
+
     <label for="table-search" class="sr-only">Search</label>
 
     <div class="relative">
