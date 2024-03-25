@@ -13,7 +13,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="w-11/12 mx-auto">
+    <main class="w-11/12 mx-auto h-[85vh]">
       <!-- Your router view or main content goes here -->
       <router-view></router-view>
     </main>
