@@ -114,7 +114,8 @@ const toggleSortOrder = () => {
               @click="toggleSortOrder"
             >
               <span>Title</span>
-              <img src="../assets/up.svg" alt="" />
+              <img v-if="sortOrder === 'asc'" src="../assets/down.svg" alt="" />
+                <img v-else src="../assets/up.svg" alt="" />
             </th>
             <th scope="col" class="tableData">Description</th>
           </tr>
